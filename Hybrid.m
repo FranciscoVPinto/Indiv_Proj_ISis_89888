@@ -132,14 +132,27 @@ ytips2 = bar_handle(2).YEndPoints;
 labels2 = string(round(bar_handle(2).YData, 3));
 text(xtips2, ytips2 + 0.01, labels2, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
 
-%% ROC Curve Plot
-[X_ROC, Y_ROC, T_ROC, AUC] = perfcurve(Y_test, Y_pred_final_continuous, 1);
+%% Compute ROC Curve for Best Initial Model (Before ANFIS)
+Y_pred_initial_continuous = evalfis(best_model, X_test);
+[X_ROC_initial, Y_ROC_initial, ~, AUC_initial] = perfcurve(Y_test, Y_pred_initial_continuous, 1);
+
+%% Compute ROC Curve for Tuned Model (After ANFIS)
+[X_ROC_final, Y_ROC_final, ~, AUC_final] = perfcurve(Y_test, Y_pred_final_continuous, 1);
+
+%% Plot ROC Curves
 figure;
-plot(X_ROC, Y_ROC, 'b-', 'LineWidth', 2);
+plot(X_ROC_initial, Y_ROC_initial, 'b-', 'LineWidth', 2); % Initial Model ROC
 hold on;
-plot([0, 1], [0, 1], 'r--'); % Diagonal line for random performance
+plot(X_ROC_final, Y_ROC_final, 'g-', 'LineWidth', 2); % Tuned Model ROC
+plot([0, 1], [0, 1], 'r--'); % Random classifier baseline
+
+% Labels and Legends
 xlabel('False Positive Rate');
 ylabel('True Positive Rate');
-title(sprintf('ROC Curve (AUC = %4.3f)', AUC));
+title(sprintf('ROC Curve Comparison\nBefore and After ANFIS Tuning'));
+legend(sprintf('Before ANFIS (AUC = %4.3f)', AUC_initial), ...
+       sprintf('After ANFIS (AUC = %4.3f)', AUC_final), ...
+       'Random Classifier', 'Location', 'southeast');
+
 grid on;
 hold off;
