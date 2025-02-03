@@ -109,50 +109,26 @@ Y_pred_final = convert_to_binary(Y_pred_final);
 
 fprintf('Final Accuracy after ANFIS Tuning: %4.3f\n', final_accuracy);
 
-%% Plot Performance Comparison
+% Adjusting Performance Metrics Display in the Bar Chart
 metrics_names = {'Accuracy', 'Recall', 'Precision', 'F1-Score', 'Kappa'};
-initial_metrics = best_metrics;
-tuned_metrics = [final_accuracy, final_recall, final_precision, final_f1, final_kappa];
+initial_metrics = best_metrics * 100; % Convert to percentage
+tuned_metrics = [final_accuracy, final_recall, final_precision, final_f1, final_kappa] * 100;
 
 figure;
 bar_handle = bar([initial_metrics; tuned_metrics]', 'grouped', 'BarWidth', 0.4);  
 set(gca, 'xticklabel', metrics_names);
-ylabel('Metric Value');
+ylabel('Metric Value (%)');
+ylim([70 100]);
 title('Performance Comparison Before and After ANFIS Tuning');
 legend({'Best Initial Model', 'After ANFIS Tuning'}, 'Location', 'best');
 
 % Add values on each bar with spacing
 xtips1 = bar_handle(1).XEndPoints;
 ytips1 = bar_handle(1).YEndPoints;
-labels1 = string(round(bar_handle(1).YData, 3));
-text(xtips1, ytips1 + 0.01, labels1, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+labels1 = string(round(bar_handle(1).YData, 1)); % One decimal place
+text(xtips1, ytips1 + 0.2, labels1, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
 
 xtips2 = bar_handle(2).XEndPoints;
 ytips2 = bar_handle(2).YEndPoints;
-labels2 = string(round(bar_handle(2).YData, 3));
-text(xtips2, ytips2 + 0.01, labels2, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
-
-%% Compute ROC Curve for Best Initial Model (Before ANFIS)
-Y_pred_initial_continuous = evalfis(best_model, X_test);
-[X_ROC_initial, Y_ROC_initial, ~, AUC_initial] = perfcurve(Y_test, Y_pred_initial_continuous, 1);
-
-%% Compute ROC Curve for Tuned Model (After ANFIS)
-[X_ROC_final, Y_ROC_final, ~, AUC_final] = perfcurve(Y_test, Y_pred_final_continuous, 1);
-
-%% Plot ROC Curves
-figure;
-plot(X_ROC_initial, Y_ROC_initial, 'b-', 'LineWidth', 2); % Initial Model ROC
-hold on;
-plot(X_ROC_final, Y_ROC_final, 'g-', 'LineWidth', 2); % Tuned Model ROC
-plot([0, 1], [0, 1], 'r--'); % Random classifier baseline
-
-% Labels and Legends
-xlabel('False Positive Rate');
-ylabel('True Positive Rate');
-title(sprintf('ROC Curve Comparison\nBefore and After ANFIS Tuning'));
-legend(sprintf('Before ANFIS (AUC = %4.3f)', AUC_initial), ...
-       sprintf('After ANFIS (AUC = %4.3f)', AUC_final), ...
-       'Random Classifier', 'Location', 'southeast');
-
-grid on;
-hold off;
+labels2 = string(round(bar_handle(2).YData, 1)); % One decimal place
+text(xtips2, ytips2 + 0.2, labels2, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
